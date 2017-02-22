@@ -44,14 +44,14 @@ void setupPrims() {
 	//updateParticles is the function you can use to update the position of the particles (directly from the physics code)
 	//The access is contiguous from an start idx to idx+count particles. You may need to do multiple calls.
 	//Called here as an example to initialize to random values all particles inside the box. This code can be removed.
-	float *partVerts = new float[LilSpheres::maxParticles * 3];
+	/*float *partVerts = new float[LilSpheres::maxParticles * 3];
 	for(int i = 0; i < LilSpheres::maxParticles; ++i) {
 		partVerts[i * 3 + 0] = ((float)rand() / RAND_MAX) * 10.f - 5.f;
 		partVerts[i * 3 + 1] = ((float)rand() / RAND_MAX) * 10.f;
 		partVerts[i * 3 + 2] = ((float)rand() / RAND_MAX) * 10.f - 5.f;
 	}
 	LilSpheres::updateParticles(0, LilSpheres::maxParticles, partVerts);
-	delete[] partVerts;
+	delete[] partVerts;*/
 	//
 }
 void cleanupPrims() {
