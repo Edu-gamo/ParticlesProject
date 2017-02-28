@@ -14,6 +14,15 @@ extern void PhysicsUpdate(float dt);
 extern void PhysicsCleanup();
 extern void GUI();
 
+extern int type;
+extern int style;
+extern int elasticity;
+extern int friction;
+extern int object;
+extern int posA[3];
+extern int posB[3];
+extern int radius;
+
 extern void GLmousecb(MouseEvent ev);
 extern void GLResize(int width, int height);
 extern void GLinit(int width, int height);
