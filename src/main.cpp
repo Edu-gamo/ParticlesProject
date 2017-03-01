@@ -4,6 +4,9 @@
 #include <imgui\imgui.h>
 #include <imgui\imgui_impl_glfw_gl3.h>
 #include <cstdio>
+#include <glm\gtc\type_ptr.hpp>
+#include <glm\gtc\matrix_transform.hpp>
+#include <cassert>
 
 #include "GL_framework.h"
 
@@ -19,9 +22,21 @@ extern int style;
 extern int elasticity;
 extern int friction;
 extern int object;
-extern int posA[3];
-extern int posB[3];
+extern int posA[];
+extern int posB[];
+extern int posC[];
 extern int radius;
+
+extern bool renderSphere;
+extern bool renderCapsule;
+
+namespace Sphere {
+	extern void updateSphere(glm::vec3 pos, float radius = 1.f);
+}
+
+namespace Capsule {
+	extern void updateCapsule(glm::vec3 posA, glm::vec3 posB, float radius = 1.f);
+}
 
 extern void GLmousecb(MouseEvent ev);
 extern void GLResize(int width, int height);
@@ -103,6 +118,13 @@ int main(int argc, char** argv){
 				MouseEvent::Button::None)))};
 			GLmousecb(ev);
 		}
+
+		if (object == 0) {
+			Sphere::updateSphere(glm::vec3((float)posA[0], (float)posA[1], (float)posA[2]), radius);
+		} else {
+			Capsule::updateCapsule(glm::vec3((float)posB[0], (float)posB[1], (float)posB[2]), glm::vec3((float)posC[0], (float)posC[1], (float)posC[2]), radius);
+		}
+
 		GLrender();
 	
 		glfwSwapBuffers(window);//Swap front and back buffers

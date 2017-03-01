@@ -6,9 +6,11 @@ int style = 0;
 int elasticity = 0;
 int friction = 0;
 int object = 0;
-int posA[3] = { 0,0,0 };
-int posB[3] = { 1,1,1 };
-int radius = 10;
+int posA[3] = { 0,1,0 };
+int posB[3] = { -3,2,-2 };
+int posC[3] = { -4,2,2 };
+
+int radius = 1;
 
 bool show_test_window = false;
 void GUI() {
@@ -46,8 +48,8 @@ void GUI() {
 		if (object == 0) {
 			ImGui::DragInt3("Position", posA, 1);
 		} else {
-			ImGui::DragInt3("Position A", posA, 1);
-			ImGui::DragInt3("Position B", posB, 1);
+			ImGui::DragInt3("Position A", posB, 1);
+			ImGui::DragInt3("Position B", posC, 1);
 		}
 		ImGui::DragInt("Radius", &radius, 1, 0, 100);
 

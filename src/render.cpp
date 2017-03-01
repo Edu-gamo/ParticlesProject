@@ -20,6 +20,12 @@ void setupAxis();
 void cleanupAxis();
 void drawAxis();
 }
+
+namespace Sphere {
+	void cleanupSphere();
+	void updateSphere(glm::vec3 pos, float radius);
+}
+
 extern void setupPrims();
 extern void renderPrims();
 extern void cleanupPrims();
