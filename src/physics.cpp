@@ -1,5 +1,6 @@
 #include <imgui\imgui.h>
 #include <imgui\imgui_impl_glfw_gl3.h>
+#include <stdlib.h>
 
 int type = 0;
 int style = 0;
@@ -11,6 +12,15 @@ int posB[3] = { -3,2,-2 };
 int posC[3] = { -4,2,2 };
 
 int radius = 1;
+
+struct particle{
+
+	float posX, posY, posZ;
+	float velX, velY, velZ;
+
+};
+
+particle *particles = new particle[500];
 
 bool show_test_window = false;
 void GUI() {
@@ -65,9 +75,22 @@ void GUI() {
 
 void PhysicsInit() {
 	//TODO
+	for (int i = 0; i < 500; ++i) {
+		particles[i].posX = ((float)rand() / RAND_MAX) * 10.f - 5.f;
+		particles[i].posY = 10.0f;
+		particles[i].posZ = ((float)rand() / RAND_MAX) * 10.f - 5.f;
+
+		particles[i].velX = 0.0f;
+		particles[i].velY = 0.0f;
+		particles[i].velZ = 0.0f;
+	}
 }
 void PhysicsUpdate(float dt) {
 	//TODO
+	/*for (int i = 0; i < 500; ++i) {
+		particles[i].posY -= dt*5.0f;
+		if (particles[i].posY < 0.0f) particles[i].posY = 10.0f;
+	}*/
 }
 void PhysicsCleanup() {
 	//TODO
