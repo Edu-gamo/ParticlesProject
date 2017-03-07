@@ -26,6 +26,8 @@ void GUI() {
 		ImGui::RadioButton("Cascada", &type, 0); ImGui::SameLine();
 		ImGui::RadioButton("Fuente", &type, 1);
 
+		ImGui::DragInt3("Particles Pos.", posA, 1);
+
 		ImGui::Text("\nSeleccionar forma de calculo:");
 		//static int style = 0;
 		ImGui::RadioButton("Euler", &style, 0); ImGui::SameLine();
