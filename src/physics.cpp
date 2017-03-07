@@ -11,7 +11,10 @@ int posA[3] = { 0,1,0 };
 int posB[3] = { -3,2,-2 };
 int posC[3] = { -4,2,2 };
 
-int radius = 1;
+int posParticles[3] = { 0,10,0 };
+
+float radiusSphere = 1.0f;
+float radiusCapsule = 1.0f;
 
 struct particle{
 
@@ -36,7 +39,7 @@ void GUI() {
 		ImGui::RadioButton("Cascada", &type, 0); ImGui::SameLine();
 		ImGui::RadioButton("Fuente", &type, 1);
 
-		ImGui::DragInt3("Particles Pos.", posA, 1);
+		ImGui::DragInt3("Particles Pos.", posParticles, 1);
 
 		ImGui::Text("\nSeleccionar forma de calculo:");
 		//static int style = 0;
@@ -59,11 +62,12 @@ void GUI() {
 		//static int posA[3] = { 0,0,0 }, posB[3] = { 1,1,1 }, radius = 10;
 		if (object == 0) {
 			ImGui::DragInt3("Position", posA, 1);
+			ImGui::DragFloat("Radius", &radiusSphere, 0.1f, 0, 100);
 		} else {
 			ImGui::DragInt3("Position A", posB, 1);
 			ImGui::DragInt3("Position B", posC, 1);
+			ImGui::DragFloat("Radius", &radiusCapsule, 0.1f, 0, 100);
 		}
-		ImGui::DragInt("Radius", &radius, 1, 0, 100);
 
 		ImGui::End();
 	}
@@ -77,10 +81,10 @@ void GUI() {
 
 void PhysicsInit() {
 	//TODO
-	for (int i = 0; i < 500; ++i) {
-		particles[i].posX = ((float)rand() / RAND_MAX) * 10.f - 5.f;
-		particles[i].posY = 10.0f;
-		particles[i].posZ = ((float)rand() / RAND_MAX) * 10.f - 5.f;
+	for (int i = 0; i < 500; i++) {
+		particles[i].posX = posParticles[0];
+		particles[i].posY = posParticles[1];
+		particles[i].posZ = posParticles[2];
 
 		particles[i].velX = 0.0f;
 		particles[i].velY = 0.0f;
@@ -89,10 +93,13 @@ void PhysicsInit() {
 }
 void PhysicsUpdate(float dt) {
 	//TODO
-	/*for (int i = 0; i < 500; ++i) {
-		particles[i].posY -= dt*5.0f;
-		if (particles[i].posY < 0.0f) particles[i].posY = 10.0f;
-	}*/
+	for (int i = 0; i < 500; ++i) {
+		particles[i].posX = posParticles[0];
+		particles[i].posY = posParticles[1];
+		particles[i].posZ = posParticles[2];
+		/*particles[i].posY -= dt*5.0f;
+		if (particles[i].posY < 0.0f) particles[i].posY = 10.0f;*/
+	}
 }
 void PhysicsCleanup() {
 	//TODO

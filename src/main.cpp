@@ -25,7 +25,8 @@ extern int object;
 extern int posA[];
 extern int posB[];
 extern int posC[];
-extern int radius;
+extern float radiusSphere;
+extern float radiusCapsule;
 
 struct particle {
 
@@ -133,9 +134,9 @@ int main(int argc, char** argv){
 		}
 
 		if (object == 0) {
-			Sphere::updateSphere(glm::vec3((float)posA[0], (float)posA[1], (float)posA[2]), radius);
+			Sphere::updateSphere(glm::vec3((float)posA[0], (float)posA[1], (float)posA[2]), radiusSphere);
 		} else {
-			Capsule::updateCapsule(glm::vec3((float)posB[0], (float)posB[1], (float)posB[2]), glm::vec3((float)posC[0], (float)posC[1], (float)posC[2]), radius);
+			Capsule::updateCapsule(glm::vec3((float)posB[0], (float)posB[1], (float)posB[2]), glm::vec3((float)posC[0], (float)posC[1], (float)posC[2]), radiusCapsule);
 		}
 
 		float *partVerts = new float[500 * 3];
