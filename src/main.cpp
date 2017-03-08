@@ -22,9 +22,9 @@ extern int style;
 extern int elasticity;
 extern int friction;
 extern int object;
-extern int posA[];
-extern int posB[];
-extern int posC[];
+extern float posA[];
+extern float posB[];
+extern float posC[];
 extern float radiusSphere;
 extern float radiusCapsule;
 
@@ -134,9 +134,9 @@ int main(int argc, char** argv){
 		}
 
 		if (object == 0) {
-			Sphere::updateSphere(glm::vec3((float)posA[0], (float)posA[1], (float)posA[2]), radiusSphere);
+			Sphere::updateSphere(glm::vec3(posA[0], posA[1], posA[2]), radiusSphere);
 		} else {
-			Capsule::updateCapsule(glm::vec3((float)posB[0], (float)posB[1], (float)posB[2]), glm::vec3((float)posC[0], (float)posC[1], (float)posC[2]), radiusCapsule);
+			Capsule::updateCapsule(glm::vec3(posB[0], posB[1], posB[2]), glm::vec3(posC[0], posC[1], posC[2]), radiusCapsule);
 		}
 
 		float *partVerts = new float[500 * 3];

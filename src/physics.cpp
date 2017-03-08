@@ -7,11 +7,11 @@ int style = 0;
 int elasticity = 0;
 int friction = 0;
 int object = 0;
-int posA[3] = { 0,1,0 };
-int posB[3] = { -3,2,-2 };
-int posC[3] = { -4,2,2 };
+float posA[3] = { 0.0f,1.0f,0.0f };
+float posB[3] = { -3.0f,2.0f,-2.0f };
+float posC[3] = { -4.0f,2.0f,2.0f };
 
-int posParticles[3] = { 0,10,0 };
+float posParticles[3] = { 0.0f,10.0f,0.0f };
 
 float radiusSphere = 1.0f;
 float radiusCapsule = 1.0f;
@@ -39,7 +39,7 @@ void GUI() {
 		ImGui::RadioButton("Cascada", &type, 0); ImGui::SameLine();
 		ImGui::RadioButton("Fuente", &type, 1);
 
-		ImGui::DragInt3("Particles Pos.", posParticles, 1);
+		ImGui::DragFloat3("Particles Pos.", posParticles, 0.1f);
 
 		ImGui::Text("\nSeleccionar forma de calculo:");
 		//static int style = 0;
@@ -53,7 +53,7 @@ void GUI() {
 		//static int friction = 0;
 		ImGui::DragInt("Friccion", &friction, 1, 0, 100);
 
-		ImGui::Text("\nSeleccionar objeto a mostrar:");
+		ImGui::Text("\nSeleccionar objeto a modificar:");
 		//static int object = 0;
 		ImGui::RadioButton("Esfera", &object, 0); ImGui::SameLine();
 		ImGui::RadioButton("Capsula", &object, 1);
@@ -61,12 +61,12 @@ void GUI() {
 		ImGui::Text("\nPropiedades:");
 		//static int posA[3] = { 0,0,0 }, posB[3] = { 1,1,1 }, radius = 10;
 		if (object == 0) {
-			ImGui::DragInt3("Position", posA, 1);
-			ImGui::DragFloat("Radius", &radiusSphere, 0.1f, 0, 100);
+			ImGui::DragFloat3("Position", posA, 0.1f);
+			ImGui::DragFloat("Radius", &radiusSphere, 0.1f, 0.1f, 10.0f);
 		} else {
-			ImGui::DragInt3("Position A", posB, 1);
-			ImGui::DragInt3("Position B", posC, 1);
-			ImGui::DragFloat("Radius", &radiusCapsule, 0.1f, 0, 100);
+			ImGui::DragFloat3("Position A", posB, 0.1f);
+			ImGui::DragFloat3("Position B", posC, 0.1f);
+			ImGui::DragFloat("Radius", &radiusCapsule, 0.1f, 0.1f, 10.0f);
 		}
 
 		ImGui::End();
