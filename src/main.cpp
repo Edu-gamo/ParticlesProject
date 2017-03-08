@@ -19,8 +19,8 @@ extern void GUI();
 
 extern int type;
 extern int style;
-extern int elasticity;
-extern int friction;
+extern float elasticity;
+extern float friction;
 extern int object;
 extern float posA[];
 extern float posB[];
@@ -32,6 +32,7 @@ struct particle {
 
 	float posX, posY, posZ;
 	float velX, velY, velZ;
+	float mass;
 
 };
 
@@ -46,10 +47,6 @@ namespace Sphere {
 
 namespace Capsule {
 	extern void updateCapsule(glm::vec3 posA, glm::vec3 posB, float radius = 1.f);
-}
-
-namespace LilSpheres {
-	extern void updateParticles(int startIdx, int count, float* array_data);
 }
 
 extern void GLmousecb(MouseEvent ev);
@@ -138,18 +135,6 @@ int main(int argc, char** argv){
 		} else {
 			Capsule::updateCapsule(glm::vec3(posB[0], posB[1], posB[2]), glm::vec3(posC[0], posC[1], posC[2]), radiusCapsule);
 		}
-
-		float *partVerts = new float[500 * 3];
-		for (int i = 0; i < 500; ++i) {
-			partVerts[i * 3 + 0] = particles->posX;
-			partVerts[i * 3 + 1] = particles->posY;
-			partVerts[i * 3 + 2] = particles->posZ;
-			/*partVerts[i * 3 + 0] = ((float)rand() / RAND_MAX) * 10.f - 5.f;
-			partVerts[i * 3 + 1] = ((float)rand() / RAND_MAX) * 10.f;
-			partVerts[i * 3 + 2] = ((float)rand() / RAND_MAX) * 10.f - 5.f;*/
-		}
-		LilSpheres::updateParticles(0, 500, partVerts);
-		delete[] partVerts;
 
 		GLrender();
 	
