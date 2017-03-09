@@ -6,8 +6,8 @@
 
 int type = 0;
 int style = 0;
-float elasticity = 1.0f;
-float friction = 0.0f;
+float elasticity = 0.5f;
+float friction = 0.75f;
 int object = 0;
 float posA[3] = { 0.0f,1.0f,0.0f };
 float posB[3] = { -3.0f,2.0f,-2.0f };
@@ -27,6 +27,7 @@ struct particle{
 	float posX, posY, posZ;
 	float velX, velY, velZ;
 	float mass;
+	float life;
 
 };
 
@@ -106,39 +107,58 @@ void PhysicsInit() {
 		particles[i].velY = ((float)rand() / RAND_MAX) * 2 - 1;
 		particles[i].velZ = ((float)rand() / RAND_MAX) * 2 - 1;
 
-		std::cout << particles[i].velY << std::endl;
-
 		particles[i].mass = 0.1f;
+
+		particles[i].life = ((float)rand() / RAND_MAX) * 5 - 1;
 
 	}
 }
 void PhysicsUpdate(float dt) {
 	//TODO
 	for (int i = 0; i < 500; ++i) {
+
+		if (particles[i].life <= 0.0f) {
+
+			particles[i].posX = posParticles[0];
+			particles[i].posY = posParticles[1];
+			particles[i].posZ = posParticles[2];
+
+			particles[i].velX = ((float)rand() / RAND_MAX) * 2 - 1;
+			particles[i].velY = ((float)rand() / RAND_MAX) * 2 - 1;
+			particles[i].velZ = ((float)rand() / RAND_MAX) * 2 - 1;
+
+			particles[i].life = ((float)rand() / RAND_MAX) * 5 - 1;
+
+		}
+
+		particles[i].life -= dt * 0.5f;
+
 		//Calcular posicion
 		particles[i].posX = particles[i].posX + dt * particles[i].velX;
 		particles[i].posY = particles[i].posY + dt * particles[i].velY;
 		particles[i].posZ = particles[i].posZ + dt * particles[i].velZ;
 
 		//Calcular velocidad
-		/*particles[i].velX = particles[i].mass * forceX + particles[i].velX;
-		particles[i].velY = particles[i].mass * forceY + particles[i].velY;
-		particles[i].velZ = particles[i].mass * forceZ + particles[i].velZ;*/
 		particles[i].velX = particles[i].velX + forceX * dt;
 		particles[i].velY = particles[i].velY + forceY * dt;
 		particles[i].velZ = particles[i].velZ + forceX * dt;
 
-		//Detectar Colision
-		/*if ((9.8f * particles[i].posY + dt) <= 0 || (9.8f * (particles[i].posY + dt * particles[i].velY) + dt) <= 0) {
-			particles[i].posX = (particles[i].posX + dt * particles[i].velX) - (1 + elasticity) * (-forceX*(particles[i].posX + dt * particles[i].velX) + dt)*-forceX;
-			particles[i].velX = (particles[i].mass * forceX + particles[i].velX) - (1 + elasticity) * (-forceX*(particles[i].mass * forceX + particles[i].velX))*-forceX;
-
-			particles[i].posY = (particles[i].posY + dt * particles[i].velY) - (1 + elasticity) * (-forceY*(particles[i].posY + dt * particles[i].velY) + dt)*-forceY;
-			particles[i].velY = (particles[i].mass * forceY + particles[i].velY) - (1 + elasticity) * (-forceY*(particles[i].mass * forceY + particles[i].velY))*-forceY;
-
-			particles[i].posZ = (particles[i].posZ + dt * particles[i].velZ) - (1 + elasticity) * (-forceZ*(particles[i].posZ + dt * particles[i].velZ) + dt)*-forceZ;
-			particles[i].velZ = (particles[i].mass * forceZ + particles[i].velZ) - (1 + elasticity) * (-forceZ*(particles[i].mass * forceZ + particles[i].velZ))*-forceZ;
-		}*/
+		//Detectar Colisiones
+		if ((particles[i].posY + dt) <= 0 || ((particles[i].posY + dt * particles[i].velY) + dt) <= 0) {
+			particles[i].velX = particles[i].velX * friction;
+			particles[i].velY = -particles[i].velY * elasticity;
+			particles[i].velZ = particles[i].velZ * friction;
+		}
+		if (((particles[i].posX + dt) <= -5 || (particles[i].posX + dt) >= 5) || (((particles[i].posX + dt * particles[i].velX) + dt) <= -5 || ((particles[i].posX + dt * particles[i].velX) + dt) >= 5)) {
+			particles[i].velX = -particles[i].velX * elasticity;
+			particles[i].velY = particles[i].velY * friction;
+			particles[i].velZ = particles[i].velZ * friction;
+		}
+		if (((particles[i].posZ + dt) <= -5 || (particles[i].posZ + dt) >= 5) || (((particles[i].posZ + dt * particles[i].velZ) + dt) <= -5 || ((particles[i].posZ + dt * particles[i].velZ) + dt) >= 5)) {
+			particles[i].velX = particles[i].velX * friction;
+			particles[i].velY = particles[i].velY * friction;
+			particles[i].velZ = -particles[i].velZ * elasticity;
+		}
 
 	}
 
