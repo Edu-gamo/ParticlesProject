@@ -4,7 +4,7 @@
 #include <time.h>
 #include <iostream>
 
-int type = 0;
+int type = 1;
 int style = 0;
 float elasticity = 0.5f;
 float friction = 0.75f;
@@ -14,6 +14,9 @@ float posB[3] = { -3.0f,2.0f,-2.0f };
 float posC[3] = { -4.0f,2.0f,2.0f };
 
 float posParticles[3] = { 0.0f,10.0f,0.0f };
+
+float posParticlesA[3] = { 1.0f,10.0f,0.0f };
+float posParticlesB[3] = { -1.0f,10.0f,0.0f };
 
 float radiusSphere = 1.0f;
 float radiusCapsule = 1.0f;
@@ -25,9 +28,11 @@ float forceZ = 0.0f;
 struct particle{
 
 	float posX, posY, posZ;
+	float prePosX, prePosY, prePosZ;
 	float velX, velY, velZ;
 	float mass;
 	float life;
+	float tmpX, tmpY, tmpZ;
 
 };
 
@@ -52,10 +57,15 @@ void GUI() {
 		
 		ImGui::Text("Seleccionar tipo:");
 		//static int type = 0;
-		ImGui::RadioButton("Cascada", &type, 0); ImGui::SameLine();
-		ImGui::RadioButton("Fuente", &type, 1);
-
-		ImGui::DragFloat3("Particles Pos.", posParticles, 0.1f);
+		ImGui::RadioButton("Fuente", &type, 1); ImGui::SameLine();
+		ImGui::RadioButton("Cascada", &type, 0); 
+		if (type == 0) {
+			ImGui::DragFloat3("Particles Pos.A", posParticlesA, 0.1f);
+			ImGui::DragFloat3("Particles Pos.B", posParticlesB, 0.1f);
+		}
+		else {
+			ImGui::DragFloat3("Particles Pos.", posParticles, 0.1f);
+		}
 
 		ImGui::Text("\nSeleccionar forma de calculo:");
 		//static int style = 0;
@@ -103,25 +113,53 @@ void PhysicsInit() {
 		particles[i].posY = posParticles[1];
 		particles[i].posZ = posParticles[2];
 
+		particles[i].prePosX = posParticles[0];
+		particles[i].prePosY = posParticles[1];
+		particles[i].prePosZ = posParticles[2];
+
 		particles[i].velX = ((float)rand() / RAND_MAX) * 2 - 1;
 		particles[i].velY = ((float)rand() / RAND_MAX) * 2 - 1;
 		particles[i].velZ = ((float)rand() / RAND_MAX) * 2 - 1;
 
-		particles[i].mass = 0.1f;
+		particles[i].mass = 1.0f;
 
 		particles[i].life = ((float)rand() / RAND_MAX) * 5 - 1;
 
 	}
 }
+
+float RandomFloat(float a, float b) {
+	float random = ((float)rand()) / (float)RAND_MAX;
+	float diff;
+	if (b > a) {
+		diff = b - a;
+	} else {
+		diff = a - b;
+	}
+	float r = random * diff;
+	return a + r;
+}
+
 void PhysicsUpdate(float dt) {
 	//TODO
 	for (int i = 0; i < 500; ++i) {
 
 		if (particles[i].life <= 0.0f) {
 
-			particles[i].posX = posParticles[0];
-			particles[i].posY = posParticles[1];
-			particles[i].posZ = posParticles[2];
+			if (type == 0) {
+				particles[i].posX = RandomFloat(posParticlesA[0], posParticlesB[0]);
+				particles[i].posY = RandomFloat(posParticlesA[1], posParticlesB[1]);
+				particles[i].posZ = RandomFloat(posParticlesA[2], posParticlesB[2]);
+			}
+			else {
+				particles[i].posX = posParticles[0];
+				particles[i].posY = posParticles[1];
+				particles[i].posZ = posParticles[2];
+			}
+
+			particles[i].prePosX = particles[i].posX;
+			particles[i].prePosY = particles[i].posY;
+			particles[i].prePosZ = particles[i].posZ;
 
 			particles[i].velX = ((float)rand() / RAND_MAX) * 2 - 1;
 			particles[i].velY = ((float)rand() / RAND_MAX) * 2 - 1;
@@ -133,21 +171,48 @@ void PhysicsUpdate(float dt) {
 
 		particles[i].life -= dt * 0.5f;
 
-		//Calcular posicion
-		particles[i].posX = particles[i].posX + dt * particles[i].velX;
-		particles[i].posY = particles[i].posY + dt * particles[i].velY;
-		particles[i].posZ = particles[i].posZ + dt * particles[i].velZ;
+		particles[i].tmpX = particles[i].posX;
+		particles[i].tmpY = particles[i].posY;
+		particles[i].tmpZ = particles[i].posZ;
 
-		//Calcular velocidad
-		particles[i].velX = particles[i].velX + forceX * dt;
-		particles[i].velY = particles[i].velY + forceY * dt;
-		particles[i].velZ = particles[i].velZ + forceX * dt;
+		if (style == 0) {
+			//EULER
+			//Calcular posicion
+			particles[i].posX = particles[i].posX + dt * particles[i].velX;
+			particles[i].posY = particles[i].posY + dt * particles[i].velY;
+			particles[i].posZ = particles[i].posZ + dt * particles[i].velZ;
+
+			//Calcular velocidad
+			particles[i].velX = particles[i].velX + dt * (forceX / particles[i].mass);
+			particles[i].velY = particles[i].velY + dt * (forceY / particles[i].mass);
+			particles[i].velZ = particles[i].velZ + dt * (forceZ / particles[i].mass);
+
+		} else if (style == 1) {
+			//VERLET
+			//Calcular posicion
+			particles[i].posX = particles[i].posX + (particles[i].posX - particles[i].prePosX) - (fabs(forceX)/particles[i].mass) * pow(dt, 2);
+			particles[i].posY = particles[i].posY + (particles[i].posY - particles[i].prePosY) - (fabs(forceY)/particles[i].mass) * pow(dt, 2);
+			particles[i].posZ = particles[i].posZ + (particles[i].posZ - particles[i].prePosZ) - (fabs(forceZ)/particles[i].mass) * pow(dt, 2);
+
+		}
+
+		particles[i].prePosX = particles[i].tmpX;
+		particles[i].prePosY = particles[i].tmpY;
+		particles[i].prePosZ = particles[i].tmpZ;
 
 		//Detectar Colisiones
-		if ((particles[i].posY + dt) <= 0 || ((particles[i].posY + dt * particles[i].velY) + dt) <= 0) {
-			particles[i].velX = particles[i].velX * friction;
-			particles[i].velY = -particles[i].velY * elasticity;
-			particles[i].velZ = particles[i].velZ * friction;
+		//if ((particles[i].posY + dt) <= 0 || ((particles[i].posY + dt * particles[i].velY) + dt) <= 0) {
+		if (particles[i].posY <= 0) {
+			if (style == 0) {
+				particles[i].velX = particles[i].velX * friction;
+				particles[i].velY = -particles[i].velY * elasticity;
+				particles[i].velZ = particles[i].velZ * friction;
+			} else if (style == 1) {
+				//particles[i].posX = particles[i].posX * friction;
+				particles[i].posY = -particles[i].posY * elasticity;
+				//particles[i].posZ = particles[i].posZ * friction;
+
+			}
 		}
 		if (((particles[i].posX + dt) <= -5 || (particles[i].posX + dt) >= 5) || (((particles[i].posX + dt * particles[i].velX) + dt) <= -5 || ((particles[i].posX + dt * particles[i].velX) + dt) >= 5)) {
 			particles[i].velX = -particles[i].velX * elasticity;
@@ -158,6 +223,16 @@ void PhysicsUpdate(float dt) {
 			particles[i].velX = particles[i].velX * friction;
 			particles[i].velY = particles[i].velY * friction;
 			particles[i].velZ = -particles[i].velZ * elasticity;
+		}
+
+		//Colisiones Esfera
+		float distX = (particles[i].posX - posA[0]);
+		float distY = (particles[i].posY - posA[1]);
+		float distZ = (particles[i].posZ - posA[2]);
+		if (distX <= radiusSphere && distY <= radiusSphere && distZ <= radiusSphere) {
+			particles[i].velX = particles[i].velX * friction;
+			particles[i].velY = -particles[i].velY * elasticity;
+			particles[i].velZ = particles[i].velZ * friction;
 		}
 
 	}
