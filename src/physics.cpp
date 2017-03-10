@@ -130,12 +130,7 @@ void PhysicsInit() {
 
 float RandomFloat(float a, float b) {
 	float random = ((float)rand()) / (float)RAND_MAX;
-	float diff;
-	if (b > a) {
-		diff = b - a;
-	} else {
-		diff = a - b;
-	}
+	float diff = b - a;
 	float r = random * diff;
 	return a + r;
 }
@@ -157,9 +152,9 @@ void PhysicsUpdate(float dt) {
 				particles[i].posZ = posParticles[2];
 			}
 
-			particles[i].prePosX = particles[i].posX;
-			particles[i].prePosY = particles[i].posY;
-			particles[i].prePosZ = particles[i].posZ;
+			particles[i].prePosX = RandomFloat(particles[i].posX - 0.05f, particles[i].posX + 0.05f);
+			particles[i].prePosY = particles[i].posY + 0.05f;
+			particles[i].prePosZ = RandomFloat(particles[i].posZ - 0.05f, particles[i].posZ + 0.05f);
 
 			particles[i].velX = ((float)rand() / RAND_MAX) * 2 - 1;
 			particles[i].velY = ((float)rand() / RAND_MAX) * 2 - 1;
@@ -226,9 +221,9 @@ void PhysicsUpdate(float dt) {
 		}
 
 		//Colisiones Esfera
-		float distX = (particles[i].posX - posA[0]);
-		float distY = (particles[i].posY - posA[1]);
-		float distZ = (particles[i].posZ - posA[2]);
+		float distX = fabs(particles[i].posX - posA[0]);
+		float distY = fabs(particles[i].posY - posA[1]);
+		float distZ = fabs(particles[i].posZ - posA[2]);
 		if (distX <= radiusSphere && distY <= radiusSphere && distZ <= radiusSphere) {
 			particles[i].velX = particles[i].velX * friction;
 			particles[i].velY = -particles[i].velY * elasticity;
