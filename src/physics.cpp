@@ -13,10 +13,10 @@ float posA[3] = { 0.0f,1.0f,0.0f };
 float posB[3] = { -3.0f,2.0f,-2.0f };
 float posC[3] = { -4.0f,2.0f,2.0f };
 
-float posParticles[3] = { 0.0f,10.0f,0.0f };
+float posParticles[3] = { 0.0f,9.0f,0.0f };
 
-float posParticlesA[3] = { 1.0f,10.0f,0.0f };
-float posParticlesB[3] = { -1.0f,10.0f,0.0f };
+float posParticlesA[3] = { 1.0f,9.0f,0.0f };
+float posParticlesB[3] = { -1.0f,9.0f,0.0f };
 
 float radiusSphere = 1.0f;
 float radiusCapsule = 1.0f;
@@ -24,6 +24,18 @@ float radiusCapsule = 1.0f;
 float forceX = 0.0f;
 float forceY = -9.8f;
 float forceZ = 0.0f;
+
+//Normales de los planos del eje X
+float* normalXRight;
+float* normalXLeft;
+
+//Normales de los planos del eje Y
+float* normalYDown;
+float* normalYTop;
+
+//Normales de los planos del eje Z
+float* normalZFront;
+float* normalZBack;
 
 struct particle{
 
@@ -105,9 +117,105 @@ void GUI() {
 	}
 }
 
+float* NormalPlane(float* pointA, float* pointB, float* pointC) {
+
+	float vectorA[3] = { pointA[0] - pointB[0], pointA[1] - pointB[1], pointA[2] - pointB[2] };
+	float vectorB[3] = { pointC[0] - pointB[0], pointC[1] - pointB[1], pointC[2] - pointB[2] };
+
+	float normal[3] = { vectorA[1] * vectorB[2] - vectorA[2] * vectorB[1],
+		vectorA[2] * vectorB[0] - vectorA[0] * vectorB[2],
+		vectorA[0] * vectorB[1] - vectorA[1] * vectorB[0] };
+
+	//Normalizar el vector
+	float modulo = sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+	normal[0] /= modulo;
+	normal[1] /= modulo;
+	normal[2] /= modulo;
+
+	return normal;
+}
+
 void PhysicsInit() {
 	//TODO
 	srand(time(NULL));
+
+	//Calcular la normal de los planos
+	//Plano bajo
+	float pointA[3] = { -5.0f, 0.0f, -5.0f };
+	float pointB[3] = { -5.0f, 0.0f, 5.0f };
+	float pointC[3] = { 5.0f, 0.0f, 5.0f };
+	normalYDown = NormalPlane(pointA, pointB, pointC);
+
+	//Plano alto
+	pointA[0] = 5.0f;
+	pointA[1] = 10.0f;
+	pointA[2] = 5.0f;
+
+	pointB[0] = -5.0f;
+	pointB[1] = 10.0f;
+	pointB[2] = 5.0f;
+
+	pointC[0] = -5.0f;
+	pointC[1] = 10.0f;
+	pointC[2] = -5.0f;
+	normalYTop = NormalPlane(pointA, pointB, pointC);
+
+	//Plano derecha
+	pointA[0] = 5.0f;
+	pointA[1] = 0.0f;
+	pointA[2] = -5.0f;
+
+	pointB[0] = 5.0f;
+	pointB[1] = 0.0f;
+	pointB[2] = 5.0f;
+
+	pointC[0] = 5.0f;
+	pointC[1] = 10.0f;
+	pointC[2] = 5.0f;
+	normalXRight = NormalPlane(pointA, pointB, pointC);
+
+	//Plano izquierda
+	pointA[0] = -5.0f;
+	pointA[1] = 10.0f;
+	pointA[2] = 5.0f;
+
+	pointB[0] = -5.0f;
+	pointB[1] = 0.0f;
+	pointB[2] = 5.0f;
+
+	pointC[0] = -5.0f;
+	pointC[1] = 0.0f;
+	pointC[2] = -5.0f;
+	normalXLeft = NormalPlane(pointA, pointB, pointC);
+
+	//Plano frontal
+	pointA[0] = 5.0f;
+	pointA[1] = 0.0f;
+	pointA[2] = 5.0f;
+
+	pointB[0] = -5.0f;
+	pointB[1] = 0.0f;
+	pointB[2] = 5.0f;
+
+	pointC[0] = -5.0f;
+	pointC[1] = 10.0f;
+	pointC[2] = 5.0f;
+	normalZFront = NormalPlane(pointA, pointB, pointC);
+
+	//Plano trasero
+	pointA[0] = -5.0f;
+	pointA[1] = 10.0f;
+	pointA[2] = -5.0f;
+
+	pointB[0] = -5.0f;
+	pointB[1] = 0.0f;
+	pointB[2] = -5.0f;
+
+	pointC[0] = 5.0f;
+	pointC[1] = 0.0f;
+	pointC[2] = -5.0f;
+	normalZBack = NormalPlane(pointA, pointB, pointC);
+
 	for (int i = 0; i < 500; i++) {
 		particles[i].posX = posParticles[0];
 		particles[i].posY = posParticles[1];
@@ -185,9 +293,11 @@ void PhysicsUpdate(float dt) {
 		} else if (style == 1) {
 			//VERLET
 			//Calcular posicion
-			particles[i].posX = particles[i].posX + (particles[i].posX - particles[i].prePosX) - (fabs(forceX)/particles[i].mass) * pow(dt, 2);
-			particles[i].posY = particles[i].posY + (particles[i].posY - particles[i].prePosY) - (fabs(forceY)/particles[i].mass) * pow(dt, 2);
-			particles[i].posZ = particles[i].posZ + (particles[i].posZ - particles[i].prePosZ) - (fabs(forceZ)/particles[i].mass) * pow(dt, 2);
+			if (particles[i].prePosX != particles[i].posX && particles[i].prePosY != particles[i].posY && particles[i].prePosZ != particles[i].posZ) {
+				particles[i].posX = particles[i].posX + ((particles[i].posX - particles[i].prePosX) - (fabs(forceX) / particles[i].mass) * pow(dt, 2));
+				particles[i].posY = particles[i].posY + ((particles[i].posY - particles[i].prePosY) - (fabs(forceY) / particles[i].mass) * pow(dt, 2));
+				particles[i].posZ = particles[i].posZ + ((particles[i].posZ - particles[i].prePosZ) - (fabs(forceZ) / particles[i].mass) * pow(dt, 2));
+			}
 
 		}
 
@@ -196,20 +306,71 @@ void PhysicsUpdate(float dt) {
 		particles[i].prePosZ = particles[i].tmpZ;
 
 		//Detectar Colisiones
-		//if ((particles[i].posY + dt) <= 0 || ((particles[i].posY + dt * particles[i].velY) + dt) <= 0) {
-		if (particles[i].posY <= 0) {
+		//Plano bajo
+		if (((normalYDown[1] * particles[i].posY + dt) * (normalYDown[1] * (particles[i].posY + dt * particles[i].velY) + dt) <= 0 && style == 0) ||
+			((normalYDown[1] * particles[i].posY + dt) * (normalYDown[1] * (particles[i].posY + ((particles[i].posY - particles[i].prePosY) - (fabs(forceY) / particles[i].mass) * pow(dt, 2))) + dt) <= 0 && style == 1)) {
 			if (style == 0) {
 				particles[i].velX = particles[i].velX * friction;
 				particles[i].velY = -particles[i].velY * elasticity;
 				particles[i].velZ = particles[i].velZ * friction;
 			} else if (style == 1) {
-				//particles[i].posX = particles[i].posX * friction;
-				particles[i].posY = -particles[i].posY * elasticity;
-				//particles[i].posZ = particles[i].posZ * friction;
+				float bounce = fabs(particles[i].posY - particles[i].prePosY) * elasticity;
+				particles[i].posY = 0.0f;
+				particles[i].prePosY = particles[i].posY - bounce;
+			}
+		}
+
+		//Plano alto
+		/*if (((normalYTop[1] * particles[i].posY + dt) * (normalYTop[1] * (particles[i].posY + dt * particles[i].velY) + dt) <= 0 && style == 0) ||
+			((normalYTop[1] * particles[i].posY + dt) * (normalYTop[1] * (particles[i].posY + ((particles[i].posY - particles[i].prePosY) - (fabs(forceY) / particles[i].mass) * pow(dt, 2))) + dt) <= 0 && style == 1)) {
+			if (style == 0) {
+
+			} else if (style == 1) {
 
 			}
 		}
-		if (((particles[i].posX + dt) <= -5 || (particles[i].posX + dt) >= 5) || (((particles[i].posX + dt * particles[i].velX) + dt) <= -5 || ((particles[i].posX + dt * particles[i].velX) + dt) >= 5)) {
+
+		//Plano darecha
+		if (((normalXRight[0] * particles[i].posX + dt) * (normalXRight[0] * (particles[i].posX + dt * particles[i].velX) + dt) <= 0 && style == 0) ||
+			((normalXRight[0] * particles[i].posX + dt) * (normalXRight[0] * (particles[i].posX + ((particles[i].posX - particles[i].prePosX) - (fabs(forceX) / particles[i].mass) * pow(dt, 2))) + dt) <= 0 && style == 1)) {
+			if (style == 0) {
+
+			} else if (style == 1) {
+
+			}
+		}
+
+		//Plano izquierda
+		if (((normalXLeft[0] * particles[i].posX + dt) * (normalXLeft[0] * (particles[i].posX + dt * particles[i].velX) + dt) <= 0 && style == 0) ||
+			((normalXLeft[0] * particles[i].posX + dt) * (normalXLeft[0] * (particles[i].posX + ((particles[i].posX - particles[i].prePosX) - (fabs(forceX) / particles[i].mass) * pow(dt, 2))) + dt) <= 0 && style == 1)) {
+			if (style == 0) {
+
+			} else if (style == 1) {
+
+			}
+		}
+
+		//Plano frontal
+		if (((normalZFront[2] * particles[i].posZ + dt) * (normalZFront[2] * (particles[i].posZ + dt * particles[i].velZ) + dt) <= 0 && style == 0) ||
+			((normalZFront[2] * particles[i].posZ + dt) * (normalZFront[2] * (particles[i].posZ + ((particles[i].posZ - particles[i].prePosZ) - (fabs(forceZ) / particles[i].mass) * pow(dt, 2))) + dt) <= 0 && style == 1)) {
+			if (style == 0) {
+
+			} else if (style == 1) {
+
+			}
+		}
+
+		//Plano trasero
+		if (((normalZBack[2] * particles[i].posZ + dt) * (normalZBack[2] * (particles[i].posZ + dt * particles[i].velZ) + dt) <= 0 && style == 0) ||
+			((normalZBack[2] * particles[i].posZ + dt) * (normalZBack[2] * (particles[i].posZ + ((particles[i].posZ - particles[i].prePosZ) - (fabs(forceZ) / particles[i].mass) * pow(dt, 2))) + dt) <= 0 && style == 1)) {
+			if (style == 0) {
+
+			} else if (style == 1) {
+
+			}
+		}*/
+
+		/*if (((particles[i].posX + dt) <= -5 || (particles[i].posX + dt) >= 5) || (((particles[i].posX + dt * particles[i].velX) + dt) <= -5 || ((particles[i].posX + dt * particles[i].velX) + dt) >= 5)) {
 			particles[i].velX = -particles[i].velX * elasticity;
 			particles[i].velY = particles[i].velY * friction;
 			particles[i].velZ = particles[i].velZ * friction;
@@ -218,16 +379,22 @@ void PhysicsUpdate(float dt) {
 			particles[i].velX = particles[i].velX * friction;
 			particles[i].velY = particles[i].velY * friction;
 			particles[i].velZ = -particles[i].velZ * elasticity;
-		}
+		}*/
 
 		//Colisiones Esfera
-		float distX = fabs(particles[i].posX - posA[0]);
-		float distY = fabs(particles[i].posY - posA[1]);
-		float distZ = fabs(particles[i].posZ - posA[2]);
-		if (distX <= radiusSphere && distY <= radiusSphere && distZ <= radiusSphere) {
-			particles[i].velX = particles[i].velX * friction;
-			particles[i].velY = -particles[i].velY * elasticity;
-			particles[i].velZ = particles[i].velZ * friction;
+		float distX = fabs(particles[i].posX - posA[0]) - radiusSphere;
+		float distY = fabs(particles[i].posY - posA[1]) - radiusSphere;
+		float distZ = fabs(particles[i].posZ - posA[2]) - radiusSphere;
+		if (distX <= 0 && distY <= 0 && distZ <= 0) {
+			if (style == 0) {
+				particles[i].velX = particles[i].velX * friction;
+				particles[i].velY = -particles[i].velY * elasticity;
+				particles[i].velZ = particles[i].velZ * friction;
+			} else if (style == 1) {
+				float bounce = fabs(particles[i].posY - particles[i].prePosY) * elasticity;
+				particles[i].posY = 0.0f;
+				particles[i].prePosY = particles[i].posY - bounce;
+			}
 		}
 
 	}
