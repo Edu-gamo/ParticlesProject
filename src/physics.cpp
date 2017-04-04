@@ -601,15 +601,15 @@ void PhysicsUpdate(float dt) {
 			float V[3] = { Q[0] - P[0], Q[1] - P[1], Q[2] - P[2] };
 
 			float a = (pow(V[0], 2) + pow(V[1], 2) + pow(V[2], 2));
-			float b = (2 * P[0] * V[0] - V[0] * posA[0] - V[0] + 2 * P[1] * V[1] - V[1] * posA[1] - V[1] + 2 * P[2] * V[2] - V[2] * posA[2] - V[2]);
-			float c = (-2 * P[0] * posA[0] + pow(posA[0], 2) - 2 * P[1] * posA[1] + pow(posA[1], 2) - 2 * P[2] * posA[2] + pow(posA[2], 2) - pow(radiusSphere, 2));
+			float b = (2 * P[0] * V[0] - 2 * V[0] * posA[0] + 2 * P[1] * V[1] - 2 * V[1] * posA[1] + 2 * P[2] * V[2] - 2 * V[2] * posA[2]);
+			float c = (pow(P[0], 2) - 2*P[0]*posA[0]+ pow(posA[0], 2) + pow(P[1], 2) - 2 * P[1] * posA[1] + pow(posA[1], 2) + pow(P[2], 2) - 2 * P[2] * posA[2] + pow(posA[2], 2)) - pow(radiusSphere, 2);
 
 			float alpha[2] = { (-b + sqrt(pow(b,2) - 4 * a*c)) / (2 * a),
 								(-b - sqrt(pow(b,2) - 4 * a*c)) / (2 * a),
 			};
 
-			float colision1[3] = { P[0] + V[0] * alpha[0], P[1] + V[1] * alpha[0] , P[1] + V[1] * alpha[0] };
-			float colision2[3] = { P[0] + V[0] * alpha[1], P[1] + V[1] * alpha[1] , P[1] + V[1] * alpha[1] };
+			float colision1[3] = { P[0] + V[0] * alpha[0], P[1] + V[1] * alpha[0] , P[2] + V[2] * alpha[0] };
+			float colision2[3] = { P[0] + V[0] * alpha[1], P[1] + V[1] * alpha[1] , P[2] + V[2] * alpha[1] };
 
 			float distCol1 = sqrt(pow(P[0] - colision1[0], 2) + pow(P[1] - colision1[1], 2) + pow(P[2] - colision1[2], 2));
 			float distCol2 = sqrt(pow(P[0] - colision2[0], 2) + pow(P[1] - colision2[1], 2) + pow(P[2] - colision2[2], 2));
@@ -676,7 +676,6 @@ void PhysicsUpdate(float dt) {
 			}
 
 		}
-
 
 		particles[i].prePosX = particles[i].posX;
 		particles[i].prePosY = particles[i].posY;
